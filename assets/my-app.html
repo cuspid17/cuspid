@@ -5,73 +5,171 @@
 -->
 
 <link rel="import" href="../bower_components/polymer/polymer.html">
-<link rel="import" href="../bower_components/paper-styles/paper-styles.html">
-<link rel="import" href="../bower_components/spiral-knob/spiral-knob.html">
-
-<script src="../bower_components/spiral/spiral.min.js"></script>
 
 <dom-module id="my-app">
-
+   
   <style>
-    /* your style here */
-    :host {
-      display: block;
-      margin: 1em;
-      font-family: 'Roboto', 'Noto', sans-serif;
-      color: #263238;
-      -webkit-font-smoothing: antialiased;
-      -webkit-user-select: none;
-    }
+ 		#container {
+			margin: 0px auto;
+			width: 500px;
+			height: 375px;
+			border: 10px #333 solid;
+		}
+		
+		#live {
+			width: 500px;
+			height: 375px;
+			background-color: #666;
+		}
+
+		button.jybutton{
+			display: inline-block;
+			width: 40px;
+			height: 40px;
+			margin-right: 10px;
+			border: 1px solid #777;
+			background: #AAA;
+			color: #555;
+			border-radius: 4px;
+		}
+		.transition {
+   			-webkit-transition: 500ms all ease-out;
+   			-moz-transition: 500ms all ease-out;
+   			-ms-transition: 500ms all ease-out;
+   			-o-transition: 500ms all ease-out;
+   			transition: 500ms all ease-out;
+		} 
   </style>
 
   <template>
     <!-- your DOM here -->
-    <h1>Changed grrrrrrrrrrrrr!</h1>
-    <spiral-knob id="knobAmp" label="Amp" value="0.25"></spiral-knob>
+    <h1>My First Music App!</h1>
+	<div id="container">
+    	<video id="live" autoplay></video>
+		<div class="buttons">
+			<button class="jybutton eff1">이펙트1</button>
+			<button class="jybutton eff2">이펙트2</button>
+			<button class="jybutton eff3">이펙트3</button>
+			<button class="jybutton eff4">이펙트4</button>
+			<button class="jybutton eff5">이펙트5</button>
+			<button class="jybutton eff6">이펙트6</button>
+		</div>
+  	</div>
   </template>
-
+  
+  <script type="text/javascript" src="http://code.jquery.com/jquery-1.8.3.min.js"></script>
+  
   <script>
+    
+
     Polymer({
 
       is: "my-app",
-
-      /* user-defined properties */
       properties: {
-        
+        /* user-defined properties */
         context: {
           type: Object,
           value: new AudioContext()
         }
         
+        
       },
-
       /* user-defined methods */
-      _buildAudioGraph: function () {
-        this.context.createNodes(this, {
-          'osc': 'Oscillator',
-          'amp': 'Gain'
-        });
+      buildGraph: function(){
+        var c = this.context;
+        video = document.getElementById("live")
+        navigator.getUserMedia = (navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia);
 
-        this.osc.to(this.amp).to(this.context.DAC);
-        this.amp.value = 0.25;
-        this.osc.frequency.value = 220;
-        this.osc.start();
-      },
+        if(navigator.getUserMedia) {
+          navigator.getUserMedia({video: true, audio: true}, getMediaSuccess, getMediaError);
+        } else {
+        	alert('getUserMedia not supported.');
+    	}
+	    
+	    function getMediaSuccess(mediaStream) {
+   	 		var microphone = c.createMediaStreamSource(mediaStream);
+			microphone.connect(c.destination)
+			localMediaStream = mediaStream;
+			video.src = window.webkitURL.createObjectURL(mediaStream)
+		}
 
-      _bindUI: function () {
-        this.$.knobAmp.bind(this.amp.gain);
-      },
+		function getMediaError(err) {
+			alert('getUserMedia error. See console.');
+			console.error(err);
+	    }
+	    
+		function myTransform( scale, skew, rotate, translate ){
+			$('video').css({
+				'-webkit-transform': 'skew('+skew+'deg) rotate('+rotate+'deg) scale('+scale+') translateX('+translate+'px)',
+				'-moz-transform': 'skew('+skew+'deg) rotate('+rotate+'deg) scale('+scale+') translateX('+translate+'px)',
+				'-ms-transform': 'skew('+skew+'deg) rotate('+rotate+'deg) scale('+scale+') translateX('+translate+'px)',
+				'-o-transform': 'skew('+skew+'deg) rotate('+rotate+'deg) scale('+scale+') translateX('+translate+'px)',
+				'transform': 'skew('+skew+'deg) rotate('+rotate+'deg) scale('+scale+') translateX('+translate+'px)'
+			});
+		}
+
+		// Handle button click
+		$('button').click(function() {
+			var skew, scale, rotate, translate;
+		    if($(this).is('.eff1') ){
+			   skew = 0;
+			   scale = 0;
+			   rotate = 1;
+		   	   translate = 0;
+		    } else if($(this).is('.eff2') ){
+			   skew = 10;
+			   scale = 0.9;
+			   rotate = 10;
+		   	   translate = 20;
+		    } else if($(this).is('.eff3') ){
+			   skew = 50*Math.random();
+			   scale = 1*Math.random();
+			   rotate = 180*Math.random();
+		   	   translate = 100*Math.random();
+		    } else if($(this).is('.eff4') ){
+			   skew = 50*Math.random();
+			   scale = 1*Math.random();
+			   rotate = 180*Math.random();
+		   	   translate = 100*Math.random();
+		    } else if($(this).is('.eff5') ){
+			   skew = 50*Math.random();
+			   scale = 1*Math.random();
+			   rotate = 180*Math.random();
+		   	   translate = 100*Math.random();
+		    }
+		    
+			myTransform( scale, skew, rotate, translate );
+		});
+     	
+     	/*
+     	if(오디오에 의해 바꾸려는 시점이면) {
+     		var skew, scale, rotate, translate;
+			   skew = 50*Math.random();
+			   scale = 1*Math.random();
+			   rotate = 180*Math.random();
+		   	   translate = 100*Math.random();
+		   	myTransform( scale, skew, rotate, translate );   
+     		
+     	}
+     	*/
+	    
+      }
+      
+
+      ,
 
       /* Polymer built-in event handlers */
       ready: function () {
         console.log('My app is ready!');
-        this._buildAudioGraph();
-        this._bindUI();
-      },
+        this.buildGraph();
 
+
+      },
       attached: function () {}
 
+      
     });
   </script>
+
 
 </dom-module>
